@@ -168,9 +168,10 @@ function formatValue(v) {
   if (v == null) return "";
   if (v instanceof Date) {
     // YYYY-MM-DD (treat Excel dates as local calendar dates)
-    const y = v.getFullYear();
-    const m = String(v.getMonth() + 1).padStart(2, "0");
-    const d = String(v.getDate()).padStart(2, "0");
+    const vv = new Date(v.getTime() + 5 * 60 * 60 * 1000);
+    const y = vv.getFullYear();
+    const m = String(vv.getMonth() + 1).padStart(2, "0");
+    const d = String(vv.getDate()).padStart(2, "0");
     return `${y}-${m}-${d}`;
   }
   if (typeof v === "number") return String(v);
@@ -427,9 +428,10 @@ function escapeHtml(s) {
 function formatDateRu(v) {
   // supports Date, ISO string, dd.mm.yyyy, etc.
   if (v instanceof Date) {
-    const dd = String(v.getDate()).padStart(2, "0");
-    const mm = String(v.getMonth() + 1).padStart(2, "0");
-    const yyyy = v.getFullYear();
+    const vv = new Date(v.getTime() + 5 * 60 * 60 * 1000);
+    const dd = String(vv.getDate()).padStart(2, "0");
+    const mm = String(vv.getMonth() + 1).padStart(2, "0");
+    const yyyy = vv.getFullYear();
     return `${dd}.${mm}.${yyyy}`;
   }
   const s = String(v ?? "").trim();
