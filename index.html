@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ProcessXLS — XLS → PDF</title>
+    <style>
+      :root {
+        --bg: #0b1220;
+        --panel: #121a2b;
+        --panel2: #0f172a;
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --border: rgba(148, 163, 184, 0.25);
+        --accent: #60a5fa;
+        --danger: #fb7185;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
+          Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        background: radial-gradient(1200px 800px at 30% 10%, #1d2a52 0%, var(--bg) 45%, #060a14 100%);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 20px;
+        letter-spacing: 0.2px;
+      }
+      header .hint {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 980px) {
+        .grid { grid-template-columns: 1fr; }
+      }
+      .card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 14px;
+        backdrop-filter: blur(10px);
+      }
+      .card h2 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        color: #dbeafe;
+        font-weight: 600;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      label {
+        font-size: 12px;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 6px;
+      }
+      input[type="file"],
+      input[type="text"],
+      select {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        padding: 10px 12px;
+        background: rgba(15, 23, 42, 0.65);
+        color: var(--text);
+        outline: none;
+      }
+      input[type="text"]::placeholder { color: rgba(148, 163, 184, 0.7); }
+      .field { flex: 1; min-width: 220px; }
+      .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+      button {
+        cursor: pointer;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        padding: 10px 12px;
+        background: rgba(96, 165, 250, 0.15);
+        color: #dbeafe;
+        font-weight: 600;
+      }
+      button:hover { border-color: rgba(96,165,250,0.65); }
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+      .danger {
+        background: rgba(251, 113, 133, 0.13);
+        color: #ffe4e6;
+      }
+      .status {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.45;
+        white-space: pre-wrap;
+      }
+      .status b { color: #e2e8f0; }
+      .preview {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: rgba(2, 6, 23, 0.55);
+        overflow: auto;
+        max-height: 560px;
+      }
+      .preview-inner {
+        padding: 10px;
+        min-width: 820px;
+      }
+      /* Excel-like HTML output tweaks */
+      .sheet-wrap { background: white; color: #111827; padding: 14px; border-radius: 10px; }
+      .sheet-wrap table { border-collapse: collapse; width: 100%; }
+      .sheet-wrap td, .sheet-wrap th { border: 1px solid #cbd5e1; padding: 4px 6px; font-size: 12px; vertical-align: top; }
+      .sheet-wrap h3 { margin: 0 0 8px; font-size: 14px; }
+      .pill {
+        display: inline-block;
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: #bfdbfe;
+        background: rgba(96,165,250,0.12);
+      }
+      .small { font-size: 12px; color: var(--muted); }
+      code {
+        background: rgba(148,163,184,0.15);
+        border: 1px solid rgba(148,163,184,0.22);
+        padding: 1px 6px;
+        border-radius: 8px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>ProcessXLS <span class="pill">XLS/XLSX → PDF</span></h1>
+        <div class="hint">Шаблоны: <code>inv.html</code> (счёт) и <code>act.html</code> (акт). Данные: лист 1.</div>
+      </header>
+
+      <div class="grid">
+        <section class="card">
+          <h2>Входные данные</h2>
+
+          <div class="row">
+            <div class="field">
+              <label>Файл Excel (.xls/.xlsx)</label>
+              <input id="fileInput" type="file" accept=".xls,.xlsx,.xlsm,.xlt,.xltx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 10px">
+            <div class="field">
+              <label>HTML-шаблон счёта (опционально, по умолчанию используется `inv.html` рядом)</label>
+              <input id="invHtmlInput" type="file" accept=".html,text/html" />
+              <div class="small" style="margin-top: 6px">
+                Если открыть страницу как <code>file://</code>, браузер может запретить загрузку <code>inv.html</code> через fetch — тогда проще выбрать файл тут.
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 10px">
+            <div class="field">
+              <label>HTML-шаблон акта (опционально, по умолчанию используется `act.html` рядом)</label>
+              <input id="actHtmlInput" type="file" accept=".html,text/html" />
+              <div class="small" style="margin-top: 6px">
+                Аналогично: при <code>file://</code> можно выбрать <code>act.html</code> вручную.
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 10px">
+            <div class="field">
+              <label>Имя колонки для названия PDF (опционально)</label>
+              <input id="nameColumn" type="text" placeholder="Например: НомерИнвойса или InvoiceNo" />
+              <div class="small" style="margin-top: 6px">
+                В шаблонах используйте плейсхолдеры вида <code>{ИмяПоля}</code> или <code>{{ИмяПоля}}</code> — они заменятся значениями из строки.
+              </div>
+            </div>
+            <div class="field">
+              <label>Режим</label>
+              <select id="mode">
+                <option value="zip">ZIP: на каждую строку 2 PDF (счёт + акт)</option>
+                <option value="single">2 общих PDF: все счета отдельно и все акты отдельно</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 10px">
+            <div class="field">
+              <label>Автонумерация «номер счёта» (если в данных нет такой колонки)</label>
+              <div class="row">
+                <div class="field" style="min-width: 180px">
+                  <input id="invPrefix" type="text" placeholder="Префикс (например: 2025-)" />
+                </div>
+                <div class="field" style="min-width: 180px">
+                  <input id="invStart" type="text" placeholder="Старт (например: 1)" />
+                </div>
+              </div>
+              <div class="small" style="margin-top: 6px">
+                Поддерживаются плейсхолдеры и в виде <code>{номер счёта}</code> (как у вас в файле), и <code>{{номер счёта}}</code>.
+              </div>
+            </div>
+          </div>
+
+          <!-- акт теперь тоже HTML (act.html) -->
+
+          <div class="row" style="margin-top: 10px">
+            <div class="btns">
+              <button id="btnLoad" disabled>Загрузить и проверить</button>
+              <button id="btnPreview" disabled>Превью 1-й строки</button>
+              <button id="btnRun" disabled>Сгенерировать PDF</button>
+              <button id="btnReset" class="danger">Сброс</button>
+            </div>
+          </div>
+
+          <div id="status" class="status"></div>
+        </section>
+
+        <section class="card">
+          <h2>Превью (inv.html + act.html, 1-я строка данных)</h2>
+          <div class="preview">
+            <div id="preview" class="preview-inner">
+              <div class="small">Загрузите файл и нажмите «Превью 1-й строки».</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Dependencies (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+

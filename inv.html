@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Счёт №{номер счёта} от {дата_ру}</title>
+  <style>
+    /* Печать на 1 A4 */
+    @page { size: A4; margin: 12mm; }
+    .sheet {
+      box-sizing: border-box;
+      width: 210mm;
+      min-height: 297mm;
+      padding: 12mm;
+      margin: 0;
+      background: #fff;
+      font-family: Arial, "Segoe UI", sans-serif;
+      font-size: 12px;
+      color: #111;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Чтобы не расползалось и обычно влезало на 1 страницу */
+    .wrap { max-width: 186mm; }
+
+    h1 {
+      font-size: 16px;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10mm;
+      margin-bottom: 8px;
+    }
+
+    .box {
+      border: 1px solid #000;
+      padding: 8px;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 6px 10px;
+      line-height: 1.25;
+    }
+
+    .kv .k { color: #000; font-weight: 700; }
+    .kv .v { color: #111; }
+
+    .amountTop {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 6px 0 0 0;
+      font-weight: 700;
+    }
+    .amountTop .big { font-size: 18px; }
+
+    .sectionTitle {
+      font-weight: 700;
+      margin: 10px 0 6px;
+    }
+
+    .para { margin: 0 0 6px 0; line-height: 1.25; }
+    .service { white-space: pre-line; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 6px 6px;
+      vertical-align: top;
+    }
+    th { font-weight: 700; text-align: left; }
+
+    .col-n { width: 10mm; text-align: center; }
+    .col-qty { width: 18mm; text-align: center; }
+    .col-unit { width: 18mm; text-align: center; }
+    .col-price { width: 28mm; text-align: right; white-space: nowrap; }
+    .col-vat { width: 24mm; text-align: center; white-space: nowrap; }
+    .col-sum { width: 30mm; text-align: right; white-space: nowrap; }
+
+    .totals {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: 1fr 70mm;
+      gap: 8px;
+      align-items: start;
+    }
+    .totals .text { line-height: 1.25; }
+    .totals .paybox {
+      border: 1px solid #000;
+      padding: 8px;
+    }
+    .paybox .line {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 3px 0;
+      font-weight: 700;
+    }
+
+    .sign {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10mm;
+      align-items: end;
+    }
+    .sign .sigline {
+      border-bottom: 1px solid #000;
+      height: 18px;
+      margin-bottom: 4px;
+    }
+    .muted { color: #333; font-size: 11px; }
+
+    /* На всякий случай: не давать переносить важные блоки */
+    .no-break { break-inside: avoid; page-break-inside: avoid; }
+
+    /* Экранный предпросмотр (если открывать inv.html отдельно) */
+    @media screen {
+      .sheet { margin: 10px auto; box-shadow: 0 0 0.6rem rgba(0,0,0,.15); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sheet">
+    <div class="wrap">
+
+      <h1>Счёт №{номер счёта} от {дата_ру}</h1>
+
+      <div class="row no-break">
+        <div class="box">
+          <div class="kv">
+            <div class="k">Получатель</div>
+            <div class="v">ИП Яковлева Ирина Николаевна</div>
+
+            <div class="k">ИНН</div>
+            <div class="v">244603088772</div>
+
+            <div class="k">Счёт</div>
+            <div class="v">40802810220000130552</div>
+
+            <div class="k">Банк</div>
+            <div class="v">ООО "Банк Точка"</div>
+
+            <div class="k">БИК</div>
+            <div class="v">044525104</div>
+
+            <div class="k">Кор. счёт</div>
+            <div class="v">30101810745374525104</div>
+          </div>
+
+          <div class="amountTop">
+            <div>Итог к оплате</div>
+            <div class="big">{сумма_формат}</div>
+          </div>
+          <div class="muted">Без НДС</div>
+        </div>
+
+        <div class="box">
+          <div class="sectionTitle">Реквизиты и адрес</div>
+          <p class="para"><b>Основание:</b> {основание}</p>
+          <p class="para">
+            Получатель: ИП Яковлева Ирина Николаевна, ИНН 244603088772,
+            127560, РОССИЯ, МОСКВА г, ПЛЕЩЕЕВА ул, ДОМ 24, кв 303,
+            р/с 40802810220000130552, в банке ООО "Банк Точка", БИК 044525104,
+            к/с 30101810745374525104
+          </p>
+
+          <p class="para">
+            Плательщик: ООО "КОМПАНИЯ ТРАНСМИЛЯ", ИНН/КПП 5031131690/044525411,
+            142432, Московская область, г. Черноголовка, пр-д 3-Й, стр. 2/1, помещ. 31,
+            р/с 40702810624570000268, в банке Филиал "Центральный" Банка ВТБ (ПАО),
+            БИК 044525411, к/с 30101810145250000411
+          </p>
+        </div>
+      </div>
+
+      <div class="no-break">
+        <div class="sectionTitle">Товары / услуги</div>
+        <table>
+          <thead>
+            <tr>
+              <th class="col-n">№</th>
+              <th>Название товара или услуги</th>
+              <th class="col-qty">Кол-во</th>
+              <th class="col-unit">Ед. изм.</th>
+              <th class="col-price">Цена</th>
+              <th class="col-vat">НДС</th>
+              <th class="col-sum">Сумма</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="col-n">1</td>
+              <td>
+                <div class="service">{услуга}</div>
+              </td>
+              <td class="col-qty">1</td>
+              <td class="col-unit">шт</td>
+              <td class="col-price">{сумма_формат}</td>
+              <td class="col-vat">Без НДС</td>
+              <td class="col-sum">{сумма_формат}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totals no-break">
+        <div class="text">
+          <p class="para">
+            Всего одно наименование на сумму {сумма_пропись}.
+          </p>
+          <p class="para"><b>Без НДС</b></p>
+        </div>
+
+        <div class="paybox">
+          <div class="line"><span>Итого:</span><span>{сумма_формат}</span></div>
+          <div class="line"><span>К оплате:</span><span>{сумма_формат}</span></div>
+          <div class="muted">Без НДС</div>
+        </div>
+      </div>
+
+      <div class="sign no-break">
+        <div>
+          <div class="sectionTitle">Получатель:</div>
+          <div class="sigline"></div>
+          <div class="muted">Индивидуальный предприниматель</div>
+          <div><b>Яковлева Ирина Николаевна</b></div>
+        </div>
+        <div>
+          <div class="sectionTitle">Подпись:</div>
+          <div class="sigline"></div>
+          <div class="muted">М.П. (при наличии)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>
